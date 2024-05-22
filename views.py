@@ -1,9 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import SignUpForm
+from .models import Record
 
 def home(request):
+    records = Record.objects.all()
+
+
+    # Check to see if logging in
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -16,7 +21,7 @@ def home(request):
             messages.error(request, "There was an error with your login. Please try again.")
             return redirect('home')
     else:
-        return render(request, 'home.html', {})
+        return render(request, 'home.html', {'records':records})
 
 def logout_user(request):
     logout(request)
@@ -39,3 +44,28 @@ def register_user(request):
         return render(request, 'register.html', {'form': form})
 
     return render(request, 'register.html', {'form': form})
+
+
+
+
+def customer_lead(request, pk):
+    if request.user.is_authenticated:
+        # Lookup record
+        customer_lead = get_object_or_404(Record, id=pk)
+        return render(request, 'leads.html', {'customer_lead': customer_lead})
+    else:
+        messages.error(request, "You must be logged in to view this lead.")
+        return redirect('home')
+
+    
+#def add_customer_lead(request, pk):
+    if request.user.is_authenticated:
+        # Lookup record
+        add_customer_lead = get_object_or_404(Record, id=pk)
+        return render(request, 'user.html', {'add_customer_lead': add_customer_lead})
+    else:
+        messages.error(request, "You must be logged in to view this lead.")
+        return redirect('home')
+
+#
+# Only the Administrator can delete the customer leads from the backend. 
